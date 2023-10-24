@@ -1,6 +1,8 @@
+import { CardNavigation } from '@/components/CardNavigation'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import './globals.css'
+import Link from 'next/link'
+import './../styles/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,7 +18,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body
+        className={`${inter.className} min-w-screen min-h-screen overflow-hidden`}
+      >
+        <div className="flex px-[182px] top-[113px] absolute">
+          <aside>
+            <nav className="flex flex-col gap-3">
+              <Link prefetch href="/">
+                <CardNavigation icon="user" title="Devs" active />
+              </Link>
+              <Link prefetch href="/level">
+                <CardNavigation icon="level" title="Níveis" active={false} />
+              </Link>
+            </nav>
+          </aside>
+          {children}
+        </div>
+      </body>
     </html>
   )
 }
