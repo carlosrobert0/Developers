@@ -1,4 +1,11 @@
-import { BiEdit, BiPlus, BiTrash } from 'react-icons/bi'
+import {
+  BiCheck,
+  BiChevronDown,
+  BiEdit,
+  BiPlus,
+  BiTrash,
+  BiX
+} from 'react-icons/bi'
 import { LiaUser } from 'react-icons/lia'
 import { SiLevelsdotfyi } from 'react-icons/si'
 
@@ -14,5 +21,11 @@ export function renderIcon(icon: string) {
       return <BiEdit size={20} />
     case 'add':
       return <BiPlus size={20} />
+    case 'close':
+      return <BiX size={20} />
+    case 'check':
+      return <BiCheck size={20} />
+    case 'chevron-down':
+      return <BiChevronDown size={20} />
   }
 }
