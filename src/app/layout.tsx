@@ -1,23 +1,24 @@
+'use client'
 import { CardNavigation } from '@/components/CardNavigation'
-import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import './../styles/globals.css'
+import { ReactQueryProvider } from './ReactQueryProvider'
+
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Desenvolvedores de Software',
-  description: 'Desenvolvedores de software com niveis de experiencia variados',
-}
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
         className={`${inter.className} min-w-screen min-h-screen overflow-hidden`}
       >
@@ -25,15 +26,24 @@ export default function RootLayout({
           <aside>
             <nav className="flex flex-col gap-3">
               <Link prefetch href="/">
-                <CardNavigation icon="user" title="Devs" active />
+                <CardNavigation
+                  icon="user"
+                  title="Devs"
+                  active={pathname === '/'}
+                />
               </Link>
               <Link prefetch href="/level">
-                <CardNavigation icon="level" title="Níveis" active={false} />
+                <CardNavigation
+                  icon="level"
+                  title="Níveis"
+                  active={pathname === '/level'}
+                />
               </Link>
             </nav>
           </aside>
-          {children}
+          <ReactQueryProvider>{children}</ReactQueryProvider>
         </div>
+        <ToastContainer />
       </body>
     </html>
   )
