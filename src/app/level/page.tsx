@@ -1,11 +1,18 @@
 'use client'
 import { DialogCreateLevel } from '@/components/Dialog/DialogCreateLevel'
+import { DialogDeleteLevel } from '@/components/Dialog/DialogDeleteLevel'
+import { DialogUpdateLevel } from '@/components/Dialog/DialogUpdateLevel'
 import { Input } from '@/components/Input'
+import { Pagination } from '@/components/Pagination'
+import { ScrollAreaView } from '@/components/ScrollAreaView'
+import { useLevelsPerPageAndPageSize } from '@/hooks/useLevelsPerPageAndPageSize'
 import { renderIcon } from '@/utils/renderIcon'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Level() {
   const [isOpenDialogCreateLevel, setIsOpenDialogCreateLevel] = useState(false)
+  const [filterLevelForName, setFilterLevelForName] = useState('' as string)
+  const [page, setPage] = useState(1)
 
   function handleOpenDialogCreateLevel() {
     setIsOpenDialogCreateLevel(true)
@@ -14,6 +21,18 @@ export default function Level() {
   function handleCloseDialogCreateLevel() {
     setIsOpenDialogCreateLevel(false)
   }
+
+  const { data, isLoading, refetch } = useLevelsPerPageAndPageSize(page, 5)
+  console.log(data)
+  const dataFiltered = data?.data?.filter(
+    (level: any) =>
+      filterLevelForName === '' ||
+      level.name.toUpperCase().includes(filterLevelForName.toUpperCase()),
+  )
+
+  useEffect(() => {
+    refetch()
+  }, [page, refetch])
 
   return (
     <>
@@ -29,7 +48,12 @@ export default function Level() {
             >
               {renderIcon('add')}
             </button>
-            <Input type="text" placeholder="Buscar nível" />
+            <Input
+              type="text"
+              placeholder="Buscar nível"
+              value={filterLevelForName}
+              onChange={(e) => setFilterLevelForName(e.currentTarget.value)}
+            />
           </div>
         </div>
         <table className="w-[920px] border-separate bg-white rounded-lg border-spacing-4">
@@ -41,20 +65,52 @@ export default function Level() {
             </tr>
           </thead>
           <tbody className="text-center">
-            <tr>
-              <td>Pleno</td>
-              <td>Carlos</td>
-              <td className="flex gap-2 justify-center">
-                {renderIcon('edit')}
-                {renderIcon('delete')}
-              </td>
-            </tr>
+            {isLoading ? (
+              <tr>
+                <td></td>
+                <td>Carregando ...</td>
+                <td></td>
+              </tr>
+            ) : (
+              dataFiltered?.map((level: any) => (
+                <tr key={level.id}>
+                  <td>{level.name}</td>
+                  <td>
+                    {level?.developers?.length > 0 ? (
+                      <ScrollAreaView data={level?.developers} />
+                    ) : (
+                      ''
+                    )}
+                  </td>
+                  {/* <td>{level.developers?.[0]?.name}</td> */}
+                  <td className="flex gap-2 justify-center">
+                    <DialogUpdateLevel
+                      dataLevel={level}
+                      refetchData={refetch}
+                    />
+                    <DialogDeleteLevel
+                      dataLevel={level}
+                      refetchData={refetch}
+                    />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
+          {dataFiltered?.length > 0 && (
+            <Pagination
+              onPageChange={setPage}
+              page={Number(data?.page)}
+              pageSize={Number(data?.pageSize)}
+              total={data?.totalLevels}
+            />
+          )}
         </table>
       </main>
       <DialogCreateLevel
         isOpen={isOpenDialogCreateLevel}
         onCloseDialog={handleCloseDialogCreateLevel}
+        refetchData={refetch}
       />
     </>
   )
