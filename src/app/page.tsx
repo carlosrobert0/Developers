@@ -1,12 +1,22 @@
 'use client'
 import { DialogCreateDeveloper } from '@/components/Dialog/DialogCreateDeveloper'
+import { DialogDeleteDeveloper } from '@/components/Dialog/DialogDeleteDeveloper'
+import { DialogUpdateDeveloper } from '@/components/Dialog/DialogUpdateDeveloper'
 import { Input } from '@/components/Input'
+import { Pagination } from '@/components/Pagination'
+import { useDevelopersPerPageAndPageSize } from '@/hooks/useDevelopersPerPageAndPageSize'
+import { useLevelsPerPageAndPageSize } from '@/hooks/useLevelsPerPageAndPageSize'
 import { renderIcon } from '@/utils/renderIcon'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 
 export default function Home() {
   const [isOpenDialogCreateDeveloper, setIsOpenDialogCreateDeveloper] =
     useState(false)
+  const [filterDeveloperForName, setFilterDeveloperForName] = useState(
+    '' as string,
+  )
+  const [page, setPage] = useState(1)
 
   function handleOpenDialogCreateDeveloper() {
     setIsOpenDialogCreateDeveloper(true)
@@ -15,6 +25,24 @@ export default function Home() {
   function handleCloseDialogCreateDeveloper() {
     setIsOpenDialogCreateDeveloper(false)
   }
+
+  const { data: dataLevel } = useLevelsPerPageAndPageSize(1, 100)
+
+  const { data, isLoading, refetch } = useDevelopersPerPageAndPageSize(page, 5)
+
+  const dataFiltered = data?.data?.filter(
+    (developer: any) =>
+      filterDeveloperForName === '' ||
+      developer.name
+        .toUpperCase()
+        .includes(filterDeveloperForName.toUpperCase()),
+  )
+
+  const toastErrorRegister = (message: string) => toast.error(message)
+
+  useEffect(() => {
+    refetch()
+  }, [page, refetch])
 
   return (
     <>
@@ -25,12 +53,24 @@ export default function Home() {
           </h1>
           <div className="flex justify-between gap-4 w-full">
             <button
-              onClick={handleOpenDialogCreateDeveloper}
+              onClick={
+                dataLevel?.data?.length > 0
+                  ? () => handleOpenDialogCreateDeveloper()
+                  : () =>
+                      toastErrorRegister(
+                        'É necessário ter pelo menos um nível cadastrado',
+                      )
+              }
               className="bg-blue_300 rounded-md text-white w-fit p-2"
             >
               {renderIcon('add')}
             </button>
-            <Input type="text" placeholder="Buscar desenvolvedor" />
+            <Input
+              type="text"
+              placeholder="Buscar desenvolvedor"
+              value={filterDeveloperForName}
+              onChange={(e) => setFilterDeveloperForName(e.currentTarget.value)}
+            />
           </div>
         </div>
         <table className="w-[920px] border-separate bg-white rounded-lg border-spacing-4">
@@ -46,48 +86,58 @@ export default function Home() {
             </tr>
           </thead>
           <tbody className="text-center">
-            <tr>
-              <td>Carlos</td>
-              <td>M</td>
-              <td>24/07/1997</td>
-              <td>26</td>
-              <td>Futebol</td>
-              <td>Pleno</td>
-              <td className="flex gap-2 justify-center">
-                {renderIcon('edit')}
-                {renderIcon('delete')}
-              </td>
-            </tr>
-            <tr>
-              <td>Carlos</td>
-              <td>M</td>
-              <td>24/07/1997</td>
-              <td>26</td>
-              <td>Futebol</td>
-              <td>Pleno</td>
-              <td className="flex gap-2 justify-center">
-                {renderIcon('edit')}
-                {renderIcon('delete')}
-              </td>
-            </tr>
-            <tr>
-              <td>Carlos</td>
-              <td>M</td>
-              <td>24/07/1997</td>
-              <td>26</td>
-              <td>Futebol</td>
-              <td>Pleno</td>
-              <td className="flex gap-2 justify-center">
-                {renderIcon('edit')}
-                {renderIcon('delete')}
-              </td>
-            </tr>
+            {isLoading ? (
+              <tr>
+                <td width="10%"></td>
+                <td width="10%"></td>
+                <td width="10%"></td>
+                <td width="30%">Carregando ...</td>
+                <td width="10%"></td>
+                <td width="10%"></td>
+                <td width="10%"></td>
+              </tr>
+            ) : (
+              dataFiltered?.map((developer: any) => {
+                const dateOfBirthFormatted = new Date(
+                  developer.dateOfBirth,
+                ).toLocaleDateString()
+                return (
+                  <tr key={developer.id}>
+                    <td>{developer.name}</td>
+                    <td>{developer.gender}</td>
+                    <td>{`${dateOfBirthFormatted}`}</td>
+                    <td>{developer.age}</td>
+                    <td>{developer.hobby}</td>
+                    <td>{developer.level.name}</td>
+                    <td className="flex gap-2 justify-center">
+                      <DialogUpdateDeveloper
+                        dataDeveloper={developer}
+                        refetchData={refetch}
+                      />
+                      <DialogDeleteDeveloper
+                        dataDeveloper={developer}
+                        refetchData={refetch}
+                      />
+                    </td>
+                  </tr>
+                )
+              })
+            )}
           </tbody>
+          {dataFiltered?.length > 0 && (
+            <Pagination
+              onPageChange={setPage}
+              page={Number(data?.page)}
+              pageSize={Number(data?.pageSize)}
+              total={data?.totalDevelopers}
+            />
+          )}
         </table>
       </main>
       <DialogCreateDeveloper
         isOpen={isOpenDialogCreateDeveloper}
         onCloseDialog={handleCloseDialogCreateDeveloper}
+        refetchData={refetch}
       />
     </>
   )
