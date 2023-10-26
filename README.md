@@ -51,7 +51,7 @@ $ npm run start
 Este projeto foi realizado o deploy na vercel e você pode usar a seguinte url em produção:
 
 ```bash
-https://developers-server.vercel.app/
+https://developers-levels.vercel.app
 ```
 
 
