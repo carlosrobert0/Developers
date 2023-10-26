@@ -7,11 +7,11 @@ export interface SelectItemProps extends Select.SelectItemProps {
   text: string
 }
 
-export function SelectItem({ text, ...props }: SelectItemProps) {
+export function SelectItem({ text, ...rest }: SelectItemProps) {
   return (
     <Select.Item
       className="flex items-center justify-between gap-2 px-3 py-2.5 outline-none data-[highlighted]:bg-zinc-50"
-      {...props}
+      {...rest}
     >
       <Select.ItemText className="text-black">{text}</Select.ItemText>
       <Select.ItemIndicator>{renderIcon('check')}</Select.ItemIndicator>
