@@ -4,6 +4,7 @@ import {
   BiEdit,
   BiPlus,
   BiTrash,
+  // eslint-disable-next-line prettier/prettier
   BiX
 } from 'react-icons/bi'
 import { LiaUser } from 'react-icons/lia'
